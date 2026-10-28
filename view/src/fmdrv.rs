@@ -1664,8 +1664,11 @@ mod tests {
     use crate::archive::Archive;
 
     fn game() -> Option<(std::path::PathBuf, Archive)> {
-        let exe = std::env::var("ARENA_EXE").ok()?;
-        let dir = std::path::Path::new(&exe).parent()?.to_path_buf();
+        // ARENA_EXE's directory, else ../ESarena as the other tests find it.
+        let dir = match std::env::var("ARENA_EXE") {
+            Ok(exe) => std::path::Path::new(&exe).parent()?.to_path_buf(),
+            Err(_) => std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../ESarena"),
+        };
         dir.join("GLOBAL.BSA").exists().then(|| (dir.clone(), Archive::open(&dir)))
     }
 
