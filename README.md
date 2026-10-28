@@ -1,5 +1,7 @@
 # tes-arena-rs
 
+![An Imperial City street, drawn by the port](docs/screenshot.png)
+
 A routine-by-routine Rust port of The Elder Scrolls: Arena (ACD.EXE, CD
 version 1.07), checked instruction for instruction against the original
 running under an emulator, and a new wgpu front end (`view/`) that plays it.
@@ -17,8 +19,8 @@ your own copy of the game (the CD version, 1.07) to run it.
 
 ## Your own game files
 
-Nothing derived from the game is in this repository: no code, no data, no
-text, no saved games.
+Nothing derived from the game is in this repository but the screenshot
+above: no code, no data, no text, no saved games.
 
 - The crate reads your own `ACD.EXE` at run time and unpacks it in memory
   (`src/exe.rs`: PKLITE 1.12 with extra compression).
