@@ -89,7 +89,7 @@ Options:
 `ready`, `compass`, `swing:DX:DY` (a right-button drag; a swing needs 40h
 mickeys or more), `cast:N`, `storm:N` (frames until the lightning flashes),
 `inv`, `equip:N`, `select:N`, `drop`, `usable`, `use:N`, `spells`, `book`,
-`spell:N`, `close`, `clickat:X:Y`, `map`, `mapbtn:N` (the automap's
+`spell:N`, `close`, `read` (the boxes read, as a key takes them), `clickat:X:Y`, `map`, `mapbtn:N` (the automap's
 buttons), `sheet`, `page` (the sheet's equipment page), `log`, `nextpage`,
 `bar:N` (the interface bar's button N), `travel`, `tclick:X:Y`, `tkey:K`
 (the travel map), `shop:KIND`, `quest`, `mq` (the main quest's state
