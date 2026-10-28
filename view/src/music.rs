@@ -572,8 +572,11 @@ mod tests {
     use super::*;
 
     fn game() -> Option<Archive> {
-        let exe = std::env::var("ARENA_EXE").ok()?;
-        let dir = std::path::Path::new(&exe).parent()?.to_path_buf();
+        // ARENA_EXE's directory, else ../ESarena as the other tests find it.
+        let dir = match std::env::var("ARENA_EXE") {
+            Ok(exe) => std::path::Path::new(&exe).parent()?.to_path_buf(),
+            Err(_) => std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../ESarena"),
+        };
         dir.join("GLOBAL.BSA").exists().then(|| Archive::open(&dir))
     }
 
@@ -647,6 +650,26 @@ mod tests {
                 write_wav(&std::path::Path::new(&dir).join(format!("{s}.wav")), &pcm);
                 eprintln!("{s}: rms {l:.0} {r:.0}, peak {peak}");
             }
+        }
+    }
+
+    /// Whole songs written as WAVs, as the window plays them: MUSIC_WAV
+    /// the directory, MUSIC_SONGS the names (comma-separated; every one
+    /// when unset). Each runs its length at 120 Hz, at most four minutes.
+    /// `cargo test --release -p arena-view export_songs -- --ignored`.
+    #[test]
+    #[ignore]
+    fn export_songs() {
+        let Some(a) = game() else { return };
+        let dir = std::env::var("MUSIC_WAV").expect("MUSIC_WAV: where the WAVs go");
+        let names = std::env::var("MUSIC_SONGS").unwrap_or_else(|_| SONGS.join(","));
+        for s in names.split(',').filter(|s| !s.is_empty()) {
+            let xmi = a.read(&format!("{s}.XFM")).unwrap_or_else(|| panic!("{s}.XFM"));
+            let secs = (Xmi::parse(&xmi).expect("an XMIDI song").length() as f32 / TICKS as f32).min(240.0);
+            // A driver of its own for each, as a fresh start of the game.
+            let mut fm = Fm::new(&a.read("SBP1FM.ADV").unwrap(), a.read("SAMPLE.AD").unwrap()).unwrap();
+            write_wav(&std::path::Path::new(&dir).join(format!("{s}.wav")), &render(&mut fm, &xmi, secs));
+            eprintln!("{s}: {secs:.1} s");
         }
     }
 
