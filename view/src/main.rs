@@ -93,7 +93,8 @@
 //! the floor); another button captures the mouse. --do gains `inv`,
 //! `equip:N` and `select:N` (the list's line N), `drop`, `usable` (the
 //! use list up), `use:N`, `spells`, `book` (the spellbook printed),
-//! `spell:N` (its entry N cast), `close`, `clickat:X:Y` (a click at X, Y
+//! `spell:N` (its entry N cast), `close`, `read` (the boxes read, as a key
+//! takes them), `clickat:X:Y` (a click at X, Y
 //! of the 320 x 200 screen), and as debugging aids `give:N` (N items
 //! made and given), `learn:N` (spell N put in the book), `sp:N` (spell
 //! points), `gold:N`, `hp:N` (the health), `day:N` (the clock, 5CC, N days
@@ -2680,6 +2681,9 @@ fn shot(dir: &std::path::Path, mut engine: Engine, mut run: arena::transit::Run,
             }
             "spells" => st.panel = Some(panels::Panel::Spellbook(Default::default())),
             "close" => st.panel = None,
+            // The boxes read (a key or a click takes them, as the window's
+            // `box_read`): the picture shows none after.
+            "read" => st.boxes.clear(),
             "give" => panels::give(&mut engine.m, n as u16),
             "learn" => panels::learn(&mut engine.m, n as u8),
             "corpse" => println!("corpse: {}", panels::corpse(&mut engine)),
@@ -3043,7 +3047,7 @@ fn shot(dir: &std::path::Path, mut engine: Engine, mut run: arena::transit::Run,
     enc.set_depth(png::BitDepth::Eight);
     enc.write_header().expect("png").write_image_data(&data).expect("png");
     let v = engine.view();
-    println!("{out}: at ({:#x}, {:#x}) heading {:#x}, {} triangles", v.x, v.y, v.heading, st.assets.mesh.len() / 3);
+    println!("{out}: at ({:#x}, {:#x}) heading {:#x}, {} triangles, {} ticks a frame", v.x, v.y, v.heading, st.assets.mesh.len() / 3, engine.frame_ticks());
 }
 
 /// A left click in the centre of the view (`Machine::view_click`), on
