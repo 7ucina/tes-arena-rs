@@ -2148,9 +2148,13 @@ impl Creation {
                 // centred too).
                 known.push(b'\r');
                 // 2A00..2A65 on the game: the text laid out at 1044 as the
-                // original lays it out, then its box.
-                if engine.m.creation_known_layout().is_none() {
-                    eprintln!("the province's text's wrap gave up: {}", arena::giveup::describe());
+                // original lays it out, then its box. The box shows that
+                // layout (the heading, the text wrapped again by width):
+                // the wrap above is skipped where the fix for #48 finds
+                // the text nested, and the original's box never showed it.
+                match engine.m.creation_known_layout() {
+                    Some(()) => known = engine.m.mem.cstr(DS, BUF).to_vec(),
+                    None => eprintln!("the province's text's wrap gave up: {}", arena::giveup::describe()),
                 }
                 self.game_box(&mut engine.m, (DS, BUF), Back::Map);
             }

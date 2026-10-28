@@ -148,6 +148,37 @@ fn creation_draws_as_the_original() {
     assert!(wrong.is_empty(), "{} of {checked} screens differ from the original's: {}", wrong.len(), wrong.join(", "));
 }
 
+/// The province's text ("Know ye this also:") with every fix on, as the
+/// view plays: the fix for #48 leaves the text unwrapped where it finds
+/// it nested, so the box must show the original's own layout of it
+/// (1194:2A00..2A65), still the original's screen.
+#[test]
+fn the_province_text_is_laid_out_with_the_fixes_on() {
+    let Some(dir) = game_dir() else { return };
+    let s = scripts().into_iter().find(|s| s.name == "select").expect("the select script");
+    let (_, page, _) = *s.shots.iter().find(|x| x.0 == "11").expect("its step 11");
+    world::FIXED_HERE.with(|f| f.set(Some(arena::fixes::Fixes::ALL)));
+    let (mut engine, mut c) = at_first_question(&dir);
+    world::FIXED_HERE.with(|f| f.set(None));
+    for inp in create::parse_script(&s.inputs).into_iter().take(11) {
+        c.script_input(&mut engine, inp);
+        c.settle(&mut engine.m);
+    }
+    let (idx, _) = drawn(&c, &engine.m, world::palette(&dir));
+    assert!(fnv(idx.iter().map(|&i| i as u8)) == page, "the province's text differs from the original's with the fixes on");
+}
+
+/// A level whose INF names no ceiling (START.INF) keeps the ceiling's
+/// segment the program's start set (0000:5CCA: the EMS frame), so its
+/// ceiling is the frame's first texture, not the interrupt vectors.
+#[test]
+fn the_start_dungeon_keeps_the_frame_as_its_ceiling() {
+    let Some(dir) = game_dir() else { return };
+    let engine = world::load(&dir, "START.MIF");
+    let m = &engine.m;
+    assert_eq!(m.mem.r16(arena::mem::DS, arena::info::var::CEILING_SEG), m.mem.r16(arena::mem::DS, 0x9030));
+}
+
 const FRAMES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../tests/vectors/createframes.txt");
 
 /// What the original shows between two screens answered (gen_createshot's
