@@ -287,6 +287,11 @@ pub fn load(dir: &Path, level: &str) -> Engine {
     // by it plus C00h (CCCE, 0000:D865's EDX bug), so its value shows.
     let buf = 0xF000u16;
     m.mem.w16(DS, 0x9030, buf);
+    // The ceiling's texture segment set to the frame as the program's
+    // start does (0000:5CCA, `start.rs`): a level whose INF has no
+    // *CEILING (START.INF) keeps it, so its ceiling is the frame's first
+    // texture, not segment 0 (the interrupt vectors).
+    m.mem.w16(DS, 0xCB64, buf);
     // EMS on: 32 banks swapped through the frame, the last kept back
     // (21EE:0035): the INF loader caches GLOBAL.BSA's directory there
     // (bank 1Fh), and in the 3D mode (C39A bit 400h) keeps it cached
